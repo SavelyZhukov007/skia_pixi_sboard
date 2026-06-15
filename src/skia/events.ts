@@ -11,27 +11,74 @@ export function attachSkiaPointerEvents(canvas: HTMLCanvasElement, root: PIXI.Co
     return new PIXI.Point(x, y);
   };
 
-  const emit = (target: PIXI.DisplayObject, type: 'pointerdown' | 'pointerup', global: PIXI.Point) => { // вызываем событие мыши у найденного объекта
-    target.emit(type, { type, global, target } as unknown as PIXI.FederatedPointerEvent);
+  type SkiaPointerEventType = 'pointerdown' | 'pointerup' | 'pointermove' | 'pointerover' | 'pointerout'; // перечисляем обытия
+
+  let hoveredTarget: PIXI.DisplayObject | null = null; // запоминаем объект под курсором
+
+  const emit = (target: PIXI.DisplayObject, type: SkiaPointerEventType, e: PointerEvent, global: PIXI.Point) => { // создаем событие ри помощи pixi
+    target.emit(type, {
+      type,
+      target,
+      currentTarget: target,
+      global,
+      buttons: e.buttons,
+      button: e.button,
+      pointerId: e.pointerId,
+      nativeEvent: e,
+    } as unknown as PIXI.FederatedPointerEvent);
   };
 
-  const handle = (type: 'pointerdown' | 'pointerup') => (e: PointerEvent) => { // общая функция-обработчик для pointerdown и pointerup
+  const updateHoveredTarget = (e: PointerEvent): { target: PIXI.DisplayObject | null; global: PIXI.Point } => { // ищем фигуру под курсором
     const global = pointFromEvent(e);
     const target = hitTest(root, global);
-    if (!target) return;
 
-    emit(target, type, global);
+    if (hoveredTarget !== target) { // если курсор перешел другой элемент, то перезаписываем на новый
+      if (hoveredTarget) emit(hoveredTarget, 'pointerout', e, global);
+      if (target) emit(target, 'pointerover', e, global);
+      hoveredTarget = target;
+    }
+
+    return { target, global };
   };
 
-  const down = handle('pointerdown');
-  const up = handle('pointerup');
+  const move = (e: PointerEvent) => { // pointermove помогает для отображения pointerup, чтобы события работали и при неподвижном курсоре
+    const { target, global } = updateHoveredTarget(e);
+    if (target) emit(target, 'pointermove', e, global);
+  };
 
+  const down = (e: PointerEvent) => { // при нажатии на фигуру передаем pointerdown
+    const { target, global } = updateHoveredTarget(e);
+    canvas.setPointerCapture(e.pointerId);
+    if (target) emit(target, 'pointerdown', e, global);
+  };
+
+  const up = (e: PointerEvent) => { // при отпускании кнопки снова передаем pointerup объекту, который сейчас находится под курсором
+    const { target, global } = updateHoveredTarget(e);
+    if (target) emit(target, 'pointerup', e, global);
+
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId); // освобождаем указатель после pointerup, чтобы холст не получал события
+  };
+
+  const leave = (e: PointerEvent) => { // когда курсор ушел за холст, очищаем статус
+    if (!hoveredTarget) return;
+
+    const global = pointFromEvent(e);
+    emit(hoveredTarget, 'pointerout', e, global);
+    hoveredTarget = null;
+  };
+
+  canvas.addEventListener('pointermove', move);
   canvas.addEventListener('pointerdown', down);
   canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointerleave', leave);
+  canvas.addEventListener('pointercancel', leave);
 
-  return () => { // функция очистки, чтобы снять обработчики 
+  return () => { // функция очистки, чтобы снять все обработчики и не оставить ссылки на canvas после закрытия страницы
+    canvas.removeEventListener('pointermove', move);
     canvas.removeEventListener('pointerdown', down);
     canvas.removeEventListener('pointerup', up);
+    canvas.removeEventListener('pointerleave', leave);
+    canvas.removeEventListener('pointercancel', leave);
   };
 }
 
@@ -46,7 +93,7 @@ function findHit(node: PIXI.DisplayObject, global: PIXI.Point): PIXI.DisplayObje
 
   // если объект является контейнером, сначала проверяем его дочерние элементы
   if (node instanceof PIXI.Container) {
-    for (let i = 0; i < node.children.length; i++) {
+    for (let i = node.children.length - 1; i >= 0; i--) { // проверяем детей в обратном порядке, потому что последний добавленный объект визуально находится выше остальных
       const hit = findHit(node.children[i], global);
       if (hit) return hit;
     }

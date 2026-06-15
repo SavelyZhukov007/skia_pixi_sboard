@@ -8,7 +8,8 @@
 
 using namespace emscripten;
 
-// файл роль моста между skia и typescirp через emscripten
+// этот файл играет роль моста между нативным PDF api Skia и TypeScript через Emscripten
+// он нужен только во время отдельной сборки кастомного CanvasKit и не компилируется командами npm run build или vite build
 namespace
 {
     class PDFDocument
@@ -48,20 +49,21 @@ namespace
                 return val::null();
             return val(typed_memory_view(data->size(), data->bytes()));
         }
+
     private:
-        SkDynamicMemoryWStream stream; // поток куда запишем содержимое pdf
-        sk_sp<SkDocument> document; // иниуиализаруем сам документ
-        sk_sp<SkData> data; // запишем байты pdf афда после закрытия
+        SkDynamicMemoryWStream stream; // поток, куда последовательно записываем содержимое pdf
+        sk_sp<SkDocument> document; // храним создаваемый документ до вызова close
+        sk_sp<SkData> data; // сохраняем готовые байты pdf после закрытия документа
     };
 
 }
 
-// используем emscripten чтобы записать класс pdfdocument для typescript
+// используем emscripten, чтобы экспортировать класс PDFDocument из wasm в JavaScript и затем вызвать его из TypeScript
 EMSCRIPTEN_BINDINGS(skia_pdf_backend)
 {
     class_<PDFDocument>("PDFDocument")
-        .constructor<>() //инициализируем
-        //экспортируем функции
+        .constructor<>() // инициализируем
+        // экспортируем функции
         .function("beginPage", &PDFDocument::beginPage, allow_raw_pointers())
         .function("endPage", &PDFDocument::endPage)
         .function("close", &PDFDocument::close)

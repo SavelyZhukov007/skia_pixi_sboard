@@ -3,6 +3,7 @@ import * as PIXI from 'pixi.js-legacy';
 import { pixiColorToRgba, pixiMatrixToSkia } from './utils';
 import { getPixiGraphicsData, getShapeData, ExtractedShapeData, getLineDash, getShapeType } from './pixi-graphics';
 
+// этот файл переводит структуру PIXI.Container в команды CanvasKit, чтобы одна сцена одинаково отображалась на PIXI и SKIA canvas
 type SkiaPdfDocument = { // описываем минимальный набор методов PDFDocument, который нужен для экспорта сцены в PDF
   beginPage(width: number, height: number): Canvas | null;
   endPage(): void;

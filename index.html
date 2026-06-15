@@ -99,6 +99,7 @@
 </head>
 
 <body>
+  <!-- pixi -->
   <div class="canvases">
     <figure>
       <figcaption>PIXI</figcaption>
@@ -109,12 +110,15 @@
       <canvas id="skia-canvas" width="560" height="400"></canvas>
     </figure>
   </div>
+  <!-- кнопки управляют активным контейнером, его содержимым и экспортом текущего состояния сцены в PDF -->
   <div class="controls" style="margin-top: 30px; text-align: center;">
     <button id="btn-random" style="margin-right: 20px;">Сгенерировать случайную линию/фигуру</button>
+    <button id="btn-next-container" style="margin-right: 20px;">Следующий контейнер</button>
     <button id="btn-reset" style="margin-right: 20px;">Сбросить сцену</button>
     <button id="btn-pdf" class="primary" disabled>Экспорт в PDF</button>
   </div>
-  <div id="status"> </div>
+  <!-- в status выводится текущее pointer-событие или результат последнего действия пользователя -->
+  <div id="status" style="margin-top: 16px; min-height: 24px; color: #000;"></div>
   <div id="skia-info" style="margin-top: 6px; font-size: 12px; color: #333; min-height: 16px;"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>

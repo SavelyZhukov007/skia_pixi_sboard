@@ -1,6 +1,5 @@
 import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm';
 import wasmUrl from 'canvaskit-wasm/bin/canvaskit.wasm?url';
-
 type CanvasKitFactory = typeof CanvasKitInit; //  загружает и возвращает CanvasKit api
 
 declare global { // расширяем window, потому что кастомный canvaskit.js кладет CanvasKitInit именно туда
@@ -39,7 +38,7 @@ async function loadCustomCanvasKit(baseUrl: string): Promise<CanvasKitFactory | 
 
     return window.CanvasKitInit ?? null;
   } catch {
-    return null; // если сборка не загрузилась возвращаемся к npm-варианту
+    return null; // если сборка не загрузилась возвращаемся к npm варианту
   }
 }
 

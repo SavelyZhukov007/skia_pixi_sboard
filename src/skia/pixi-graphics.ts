@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js-legacy';
-
+// здесь работа с внутренними типами pixi, чтобы быстро и удобно доставать данные фигур из контейнера
 export interface ExtractedShapeData { // интерфейс данных для фигур
   shape: PIXI.Rectangle | PIXI.Circle | PIXI.Ellipse | PIXI.Polygon | PIXI.RoundedRectangle;
   fill: PIXI.FillStyle;

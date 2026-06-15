@@ -5,9 +5,9 @@ export default [
   {
     files: ['src/**/*.ts', 'tests/**/*.ts'],
     rules: {
-      '@typescript-eslint/no-explicit-any': 'warn',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-explicit-any': 'warn', // предупреждаем о потере типизации
+      'no-unused-vars': 'off', // отключаем базовое правило, чтобы не спотыкаться об допустимые неиспользуемые переменные
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }], // разрешаем намеренно неиспользуемые аргументы, если их имя начинается с подчеркивания
     },
   },
 ];
