@@ -1,0 +1,29 @@
+{
+  "name": "sboard-pixi-skia",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "lint": "eslint src tests --ext .ts",
+    "verify:pdf": "node scripts/verify_pdf.mjs scene.pdf",
+    "pages": "npm run build && npx gh-pages -d dist"
+  },
+  "dependencies": {
+    "canvaskit-wasm": "^0.41.1",
+    "pixi.js-legacy": "7.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "eslint": "^10.5.0",
+    "gh-pages": "^5.0.0",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vitest": "^3.2.3"
+  }
+}
